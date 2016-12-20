@@ -1,5 +1,6 @@
 package com.tricloudcommunications.ce.hackernewsreader;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -85,6 +87,18 @@ public class MainActivity extends AppCompatActivity {
         arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, newsList);
         newsLV.setAdapter(arrayAdapter);
 
+        newsLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Intent i = new Intent(getApplicationContext(), YourArticle.class);
+                i.putExtra("newsURL", "http://tricloudcommunications.com/login.php");
+                startActivity(i);
+
+            }
+        });
+
+
 
         if (checkDataBase()){
 
@@ -118,8 +132,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
 
-
-
             //Will return true if database exists and can be read
             Log.i("Database Status", Boolean.toString(checkDataBase()) + " The IF condition");
 
@@ -137,7 +149,6 @@ public class MainActivity extends AppCompatActivity {
             //Will return false if database DOES NOT exists and it can NOT be read
             Log.i("Database Status", Boolean.toString(checkDataBase()) + " The Else Condition");
         }
-
 
 
         //Log.i("Database Status", Boolean.toString(checkDataBase()));
