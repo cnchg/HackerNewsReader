@@ -4,9 +4,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -17,7 +16,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.URL;
 import java.util.ArrayList;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -149,11 +155,13 @@ public class MainActivity extends AppCompatActivity {
             //Will return false if database DOES NOT exists and it can NOT be read
             Log.i("Database Status", Boolean.toString(checkDataBase()) + " The Else Condition");
         }
-
-
         //Log.i("Database Status", Boolean.toString(checkDataBase()));
         //Log.i("Database Path:", String.valueOf(this.getDatabasePath("HackNews")));
         //data/data/com.tricloudcommunications.ce.hackernewsreader/databases/HackNews
+
+
+        TopStories getTopStoriesTask = new TopStories();
+        getTopStoriesTask.execute("https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty");
     }
 
     @Override
@@ -177,4 +185,55 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public class TopStories extends AsyncTask<String, Void, String>{
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            String result = "";
+
+            try {
+                //Set up Https request
+                URL url = new URL(params[0]);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                String input = params[0];
+                Log.i("Hacker News API Content", "Sending: " + input);
+                OutputStream oS = conn.getOutputStream();
+                oS.write(input.getBytes());
+                oS.flush();
+                oS.close();
+
+                //Read the data from the response
+                InputStream iS = conn.getInputStream();
+                InputStreamReader reader = new InputStreamReader(iS);
+                int data = reader.read();
+                while (data != -1) {
+                    char current = (char) data;
+                    result += current;
+                    data = reader.read();
+                }
+
+                Log.i("Hacker News API", "This is a Test");
+
+                return result;
+
+
+            }catch (IOException e){
+
+                e.printStackTrace();
+
+            }
+
+            return null;
+        }
+
+
+
+
+    }
+
 }
